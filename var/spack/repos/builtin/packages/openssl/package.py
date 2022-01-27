@@ -87,7 +87,8 @@ class Openssl(Package):   # Uses Fake Autotools, should subclass Package
                          'package, symlink system certificates, or none'))
     variant('docs', default=False, description='Install docs and manpages')
     variant('shared', default=False, description="Build shared library version")
-    variant('dynamic', default=False, description="Link with MSVC's dynamic runtime library")
+    with when('platform=windows'):
+        variant('dynamic', default=False, description="Link with MSVC's dynamic runtime library")
 
     depends_on('zlib')
     depends_on('perl@5.14.0:', type=('build', 'test'))
