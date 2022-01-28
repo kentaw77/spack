@@ -21,6 +21,9 @@ install = spack.main.SpackCommand('install')
 #: Class of the writer tested in this module
 writer_cls = spack.modules.lmod.LmodModulefileWriter
 
+pytestmark = pytest.mark.skipif(sys.platform == "win32",
+                                reason="does not run on windows")
+
 
 @pytest.fixture(params=[
     'clang@3.3',
@@ -43,7 +46,7 @@ def provider(request):
 @pytest.mark.usefixtures('config', 'mock_packages',)
 class TestLmod(object):
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_file_layout(
             self, compiler, provider, factory, module_configuration
     ):
@@ -81,7 +84,7 @@ class TestLmod(object):
         else:
             assert repetitions == 1
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_simple_case(self, modulefile_content, module_configuration):
         """Tests the generation of a simple TCL module file."""
 
@@ -93,7 +96,7 @@ class TestLmod(object):
         assert 'whatis([[Version : 3.0.4]])' in content
         assert 'family("mpi")' in content
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_autoload_direct(self, modulefile_content, module_configuration):
         """Tests the automatic loading of direct dependencies."""
 
@@ -102,7 +105,7 @@ class TestLmod(object):
 
         assert len([x for x in content if 'depends_on(' in x]) == 2
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_autoload_all(self, modulefile_content, module_configuration):
         """Tests the automatic loading of all dependencies."""
 
@@ -111,7 +114,7 @@ class TestLmod(object):
 
         assert len([x for x in content if 'depends_on(' in x]) == 5
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_alter_environment(self, modulefile_content, module_configuration):
         """Tests modifications to run-time environment."""
 
@@ -134,7 +137,7 @@ class TestLmod(object):
         assert len([x for x in content if 'setenv("FOO", "foo")' in x]) == 0
         assert len([x for x in content if 'unsetenv("BAR")' in x]) == 0
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_prepend_path_separator(self, modulefile_content,
                                     module_configuration):
         """Tests modifications to run-time environment."""
@@ -148,7 +151,7 @@ class TestLmod(object):
             elif re.match(r'[a-z]+_path\("SEMICOLON"', line):
                 assert line.endswith('"bar", ";")')
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_blacklist(self, modulefile_content, module_configuration):
         """Tests blacklisting the generation of selected modules."""
 
@@ -157,7 +160,7 @@ class TestLmod(object):
 
         assert len([x for x in content if 'depends_on(' in x]) == 1
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_no_hash(self, factory, module_configuration):
         """Makes sure that virtual providers (in the hierarchy) always
         include a hash. Make sure that the module file for the spec
@@ -182,7 +185,7 @@ class TestLmod(object):
 
         assert path.endswith(mpileaks_element)
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_no_core_compilers(self, factory, module_configuration):
         """Ensures that missing 'core_compilers' in the configuration file
         raises the right exception.
@@ -202,7 +205,7 @@ class TestLmod(object):
         with pytest.raises(spack.modules.lmod.CoreCompilersNotFoundError):
             module.write()
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_non_virtual_in_hierarchy(self, factory, module_configuration):
         """Ensures that if a non-virtual is in hierarchy, an exception will
         be raised.
@@ -213,7 +216,7 @@ class TestLmod(object):
         with pytest.raises(spack.modules.lmod.NonVirtualInHierarchyError):
             module.write()
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_override_template_in_package(
             self, modulefile_content, module_configuration
     ):
@@ -224,7 +227,7 @@ class TestLmod(object):
 
         assert 'Override successful!' in content
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_override_template_in_modules_yaml(
             self, modulefile_content, module_configuration
     ):
@@ -237,7 +240,7 @@ class TestLmod(object):
         content = modulefile_content('mpileaks target=x86_64')
         assert 'Override even better!' in content
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     @pytest.mark.usefixtures('config')
     def test_external_configure_args(
             self, factory
@@ -248,7 +251,7 @@ class TestLmod(object):
 
         assert 'unknown' in writer.context.configure_options
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_guess_core_compilers(
             self, factory, module_configuration, monkeypatch
     ):
@@ -272,7 +275,7 @@ class TestLmod(object):
         writer, _ = factory(mpileaks_spec_string)
         assert writer.conf.core_compilers
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     @pytest.mark.parametrize('spec_str', [
         'mpileaks target=nocona',
         'mpileaks target=core2',
@@ -289,7 +292,7 @@ class TestLmod(object):
         if spec.target.family != spec.target:
             assert str(spec.target) not in writer.layout.arch_dirname
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_projections_specific(self, factory, module_configuration):
         """Tests reading the correct naming scheme."""
 
@@ -308,7 +311,7 @@ class TestLmod(object):
         projection = writer.spec.format(writer.conf.projections['mpileaks'])
         assert projection in writer.layout.use_name
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_projections_all(self, factory, module_configuration):
         """Tests reading the correct naming scheme."""
 
@@ -327,7 +330,7 @@ class TestLmod(object):
         projection = writer.spec.format(writer.conf.projections['all'])
         assert projection in writer.layout.use_name
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_config_backwards_compat(self, mutable_config):
         settings = {
             'enable': ['lmod'],
@@ -345,7 +348,7 @@ class TestLmod(object):
         assert old_format == new_format
         assert old_format == settings['lmod']
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_modules_relative_to_view(
         self, tmpdir, modulefile_content, module_configuration, install_mockery,
         mock_fetch

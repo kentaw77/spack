@@ -18,11 +18,14 @@ libdwarf_spec_string = 'libdwarf target=x86_64'
 #: Class of the writer tested in this module
 writer_cls = spack.modules.tcl.TclModulefileWriter
 
+pytestmark = pytest.mark.skipif(sys.platform == "win32",
+                                reason="does not run on windows")
+
 
 @pytest.mark.usefixtures('config', 'mock_packages')
 class TestTcl(object):
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_simple_case(self, modulefile_content, module_configuration):
         """Tests the generation of a simple TCL module file."""
 
@@ -31,7 +34,7 @@ class TestTcl(object):
 
         assert 'module-whatis "mpich @3.0.4"' in content
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_autoload_direct(self, modulefile_content, module_configuration):
         """Tests the automatic loading of direct dependencies."""
 
@@ -55,7 +58,7 @@ class TestTcl(object):
         messages = [x for x in content if 'puts stderr "Autoloading' in x]
         assert len(messages) == 0
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_autoload_all(self, modulefile_content, module_configuration):
         """Tests the automatic loading of all dependencies."""
 
@@ -79,7 +82,7 @@ class TestTcl(object):
         messages = [x for x in content if 'puts stderr "Autoloading' in x]
         assert len(messages) == 2
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_prerequisites_direct(
             self, modulefile_content, module_configuration
     ):
@@ -90,7 +93,7 @@ class TestTcl(object):
 
         assert len([x for x in content if 'prereq' in x]) == 2
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_prerequisites_all(self, modulefile_content, module_configuration):
         """Tests asking all dependencies as prerequisites."""
 
@@ -99,7 +102,7 @@ class TestTcl(object):
 
         assert len([x for x in content if 'prereq' in x]) == 5
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     def test_alter_environment(self, modulefile_content, module_configuration):
         """Tests modifications to run-time environment."""
 
@@ -132,7 +135,7 @@ class TestTcl(object):
         assert len([x for x in content if 'module load foo/bar' in x]) == 1
         assert len([x for x in content if 'setenv LIBDWARF_ROOT' in x]) == 1
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_blacklist(self, modulefile_content, module_configuration):
         """Tests blacklisting the generation of selected modules."""
 
@@ -153,7 +156,7 @@ class TestTcl(object):
         assert len([x for x in content if 'is-loaded' in x]) == 1
         assert len([x for x in content if 'module load ' in x]) == 1
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_naming_scheme_compat(self, factory, module_configuration):
         """Tests backwards compatibility for naming_scheme key"""
         module_configuration('naming_scheme')
@@ -168,7 +171,7 @@ class TestTcl(object):
         projection = writer.spec.format(writer.conf.projections['all'])
         assert projection in writer.layout.use_name
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_projections_specific(self, factory, module_configuration):
         """Tests reading the correct naming scheme."""
 
@@ -187,7 +190,7 @@ class TestTcl(object):
         projection = writer.spec.format(writer.conf.projections['mpileaks'])
         assert projection in writer.layout.use_name
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_projections_all(self, factory, module_configuration):
         """Tests reading the correct naming scheme."""
 
@@ -206,7 +209,7 @@ class TestTcl(object):
         projection = writer.spec.format(writer.conf.projections['all'])
         assert projection in writer.layout.use_name
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_invalid_naming_scheme(self, factory, module_configuration):
         """Tests the evaluation of an invalid naming scheme."""
 
@@ -218,7 +221,7 @@ class TestTcl(object):
         with pytest.raises(RuntimeError):
             writer.layout.use_name
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_invalid_token_in_env_name(self, factory, module_configuration):
         """Tests setting environment variables with an invalid name."""
 
@@ -228,7 +231,7 @@ class TestTcl(object):
         with pytest.raises(RuntimeError):
             writer.write()
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_conflicts(self, modulefile_content, module_configuration):
         """Tests adding conflicts to the module."""
 
@@ -246,7 +249,7 @@ class TestTcl(object):
         with pytest.raises(SystemExit):
             modulefile_content('mpileaks')
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_module_index(
             self, module_configuration, factory, tmpdir_factory):
 
@@ -281,7 +284,7 @@ class TestTcl(object):
         assert len(index) == 1
         assert index[s3.dag_hash()].use_name == w3.layout.use_name
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_suffixes(self, module_configuration, factory):
         """Tests adding suffixes to module file name."""
         module_configuration('suffix')
@@ -297,7 +300,7 @@ class TestTcl(object):
         writer, spec = factory('mpileaks~debug+opt target=x86_64')
         assert 'baz-foo-bar' in writer.layout.use_name
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_setup_environment(self, modulefile_content, module_configuration):
         """Tests the internal set-up of run-time environment."""
 
@@ -318,7 +321,7 @@ class TestTcl(object):
             [x for x in content if 'setenv FOOBAR "callpath"' in x]
         ) == 1
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_override_config(self, module_configuration, factory):
         """Tests overriding some sections of the configuration file."""
         module_configuration('override_config')
@@ -333,7 +336,7 @@ class TestTcl(object):
         assert 'mpich' not in writer.layout.use_name
         assert 'static' not in writer.layout.use_name
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_override_template_in_package(
             self, modulefile_content, module_configuration
     ):
@@ -344,7 +347,7 @@ class TestTcl(object):
 
         assert 'Override successful!' in content
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_override_template_in_modules_yaml(
             self, modulefile_content, module_configuration
     ):
@@ -357,7 +360,7 @@ class TestTcl(object):
         content = modulefile_content('mpileaks target=x86_64')
         assert 'Override even better!' in content
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_extend_context(
             self, modulefile_content, module_configuration
     ):
@@ -370,7 +373,7 @@ class TestTcl(object):
         short_description = 'module-whatis "This package updates the context for TCL modulefiles."'  # NOQA: ignore=E501
         assert short_description in content
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Skip test on Windows")
+
     @pytest.mark.regression('4400')
     @pytest.mark.db
     def test_blacklist_implicits(
@@ -392,7 +395,7 @@ class TestTcl(object):
             writer = writer_cls(item, 'default')
             assert writer.conf.blacklisted
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     @pytest.mark.regression('9624')
     @pytest.mark.db
     def test_autoload_with_constraints(
@@ -410,7 +413,7 @@ class TestTcl(object):
         content = modulefile_content('mpileaks ^mpich')
         assert len([x for x in content if 'is-loaded' in x]) == 0
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="All Fetchers Failed")
+
     def test_config_backwards_compat(self, mutable_config):
         settings = {
             'enable': ['tcl'],
